@@ -6,6 +6,7 @@ import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
+import path from 'path'
 
 
 import { UserResolver } from "./resolvers/user";
@@ -27,8 +28,11 @@ const main = async () => {
     password: "davidsolis",
     logging: true,
     synchronize: true,
-    entities:[User, Post]
+    entities:[User, Post],
+    migrations:[path.join(__dirname, "/migrations/*")]
   });
+
+  connection.runMigrations()
 //   connection.connect();
   // await orm.em.nativeDelete(User, {});
 
@@ -69,7 +73,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): MyContext => ({ req, res, redis }),
+    context: ({ req, res }) => ({ req, res, redis }),
   });
 
   apolloServer.applyMiddleware({ app, cors: false });

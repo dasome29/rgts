@@ -9,6 +9,8 @@ import {
   Field,
   Ctx,
   UseMiddleware,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
@@ -22,8 +24,13 @@ class PostInput {
   text: string;
 }
 
-@Resolver()
+@Resolver(Post)
 export class PostResolver {
+  @FieldResolver(() => String)
+  textSnippet(@Root() root: Post) {
+    return root.text.slice(0, 100) + "...";
+  }
+
   @Query(() => [Post])
   posts(
     @Arg("limit", () => Int) limit: number, //Cursor-Based pagination
@@ -36,7 +43,9 @@ export class PostResolver {
       .orderBy('"createdAt"', "DESC")
       .take(limit);
     if (cursor) {
-      queryBuilder.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+      queryBuilder.where('"createdAt" < :cursor', {
+        cursor: new Date(parseInt(cursor)),
+      });
     }
 
     return queryBuilder.getMany();
