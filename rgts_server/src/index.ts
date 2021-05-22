@@ -33,6 +33,8 @@ const main = async () => {
   });
 
   connection.runMigrations()
+
+  // await Post.delete({});
 //   connection.connect();
   // await orm.em.nativeDelete(User, {});
 
