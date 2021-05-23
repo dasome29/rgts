@@ -110,15 +110,18 @@ export class PostResolver {
     if (userId){
       replacements.push(userId);
     }
+    let cursorIndex = 3
 
     if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
+      cursorIndex = replacements.length
     }
 
     
 
     console.log("User ID: ",userId)
     
+
 
     const posts = await getConnection().query(
       `
@@ -135,7 +138,7 @@ export class PostResolver {
     : `null as "voteStatus"`}
     from post p
     inner join public.user u on u.id = p."creatorId"
-    ${cursor ? `where p."createdAt" < $3` : ""}
+    ${cursor ? `where p."createdAt" < $${cursorIndex}` : ""}
     order by p."createdAt" DESC
     limit $1
     `,
@@ -149,7 +152,7 @@ export class PostResolver {
   }
   @Query(() => Post, { nullable: true })
   post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
-    return Post.findOne(id);
+    return Post.findOne(id, {relations: ["creator"]});
   }
 
   @Mutation(() => Post)
