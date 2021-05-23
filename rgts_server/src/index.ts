@@ -18,6 +18,7 @@ import cors from "cors";
 import { createConnection } from "typeorm";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
+import { Upvote } from "./entities/Upvote";
 
 const main = async () => {
   // sendEmail('dasome29@hotmail.com', 'Hola, David wapo leyendo esto.');
@@ -28,7 +29,7 @@ const main = async () => {
     password: "davidsolis",
     logging: true,
     synchronize: true,
-    entities:[User, Post],
+    entities:[User, Post, Upvote],
     migrations:[path.join(__dirname, "/migrations/*")]
   });
 
