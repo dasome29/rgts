@@ -12,7 +12,7 @@ import {
   LogoutMutation,
   VoteMutationVariables,
 } from "../generated/graphql";
-import { cacheExchange, Resolver } from "@urql/exchange-graphcache";
+import { cacheExchange, Resolver, Cache } from "@urql/exchange-graphcache";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from "wonka";
 import { useRouter } from "next/router";
@@ -30,6 +30,14 @@ const errorExchange: Exchange =
       })
     );
   };
+
+function invalidateAllPosts(cache: Cache) {
+  const allFields = cache.inspectFields("Query");
+  const fieldInfos = allFields.filter((info) => info.fieldName === "posts");
+  fieldInfos.forEach((fi) => {
+    cache.invalidate("Query", "posts", fi.arguments || {});
+  });
+}
 
 export const createUrqlClient = (ssrExchange: any) => ({
   url: "http://localhost:8000/graphql",
@@ -79,14 +87,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
           },
 
           createPost: (_result, args, cache, info) => {
-            const allFields = cache.inspectFields("Query");
-            const fieldInfos = allFields.filter(
-              (info) => info.fieldName === "posts"
-            );
-
-            fieldInfos.forEach((fi) => {
-              cache.invalidate("Query", "posts", fi.arguments || {});
-            });
+            invalidateAllPosts(cache);
           },
 
           login: (_result, args, cache, info) => {
@@ -103,6 +104,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
                 };
               }
             );
+            invalidateAllPosts(cache);
           },
           register: (_result, args, cache, info) => {
             betterUpdateQuery<RegisterMutation, MeQuery>(
@@ -142,12 +144,14 @@ export const cursorPagination = (): Resolver => {
     const allFields = cache.inspectFields(entityKey);
     const fieldInfos = allFields.filter((info) => info.fieldName === fieldName);
     const size = fieldInfos.length;
+    console.log("allFields: ", allFields)
     if (size === 0) {
       return undefined;
     }
 
     const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
-    const isInTheCache = cache.resolve(entityKey, fieldKey);
+    const isInTheCache = cache.resolve(cache.resolve(entityKey, fieldKey) as string, "posts");
+    console.log(isInTheCache)
     info.partial = !isInTheCache;
     const results: string[] = [];
     let hasMore = true;
