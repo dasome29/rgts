@@ -19,13 +19,13 @@ import { Post } from "./Post";
     @PrimaryColumn()
     userId: number;
   
-    @ManyToOne(() => User, (user) => user.upvotes)
+    @ManyToOne(() => User, (user) => user.upvotes, {onDelete:"CASCADE"})
     user: User;
   
     @PrimaryColumn()
     postId: number;
 
-    @ManyToOne(() => Post, (post) => post.upvotes)
+    @ManyToOne(() => Post, (post) => post.upvotes, {onDelete:"CASCADE"} )
     post: Post;
   }
   
