@@ -1,24 +1,10 @@
 {
-   "type": "postgres",
-   "host": "localhost",
-   "port": 8000,
-   "username": "postgres",
-   "password": "davidsolis",
-   "database": "rgts_database",
-   "synchronize": true,
-   "logging": false,
-   "entities": [
-      "src/entity/**/*.ts"
-   ],
-   "migrations": [
-      "src/migration/**/*.ts"
-   ],
-   "subscribers": [
-      "src/subscriber/**/*.ts"
-   ],
-   "cli": {
-      "entitiesDir": "src/entity",
-      "migrationsDir": "src/migrations",
-      "subscribersDir": "src/subscriber"
-   }
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "davidsolis",
+    "database": "rgts_database_2",
+    "entities": ["dist/entities/*.js"],
+    "migrations": ["dist/migrations/*.js"]
 }

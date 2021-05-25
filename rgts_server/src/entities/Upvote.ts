@@ -5,7 +5,7 @@ import {
     ManyToOne,
     PrimaryColumn,
   } from "typeorm";
-  import { Field, Int, ObjectType } from "type-graphql";
+  import { ObjectType } from "type-graphql";
   import { User } from "./User";
 import { Post } from "./Post";
   

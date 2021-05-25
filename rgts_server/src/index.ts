@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import "dotenv-safe/config"
 import { COOKIE_NAME, __prod__ } from "./constants";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -12,7 +13,6 @@ import { UserResolver } from "./resolvers/user";
 import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
-import { MyContext } from "./types";
 import cors from "cors";
 import { createConnection } from "typeorm";
 import { User } from "./entities/User";
@@ -22,14 +22,11 @@ import { createUserLoader } from "./utils/createUserLoader";
 import { createUpvoteLoader } from "./utils/createUpvoteLoader";
 
 const main = async () => {
-  // sendEmail('dasome29@hotmail.com', 'Hola, David wapo leyendo esto.');
   const connection = await createConnection({
     type: "postgres",
-    database: "rgts_database",
-    username: "postgres",
-    password: "davidsolis",
+    url: process.env.DATABASE_URL,
     logging: true,
-    synchronize: true,
+    // synchronize: true,
     entities: [User, Post, Upvote],
     migrations: [path.join(__dirname, "/migrations/*")],
   });
@@ -44,11 +41,13 @@ const main = async () => {
 
   const RedisStore = connectRedis(session);
 
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
+
+  app.set("proxy", 1)
 
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
     })
   );
@@ -65,9 +64,10 @@ const main = async () => {
         httpOnly: true,
         secure: __prod__,
         sameSite: "lax",
+        // domain: __prod__ ? '.codeponder.com' : undefined
       },
       saveUninitialized: false,
-      secret: "iahsdbfvihbdihsbdcfo",
+      secret: process.env.SECRET_SESSION,
       resave: false,
     })
   );
@@ -88,7 +88,7 @@ const main = async () => {
 
   apolloServer.applyMiddleware({ app, cors: false });
 
-  app.listen(8000, () => {
+  app.listen(parseInt(process.env.PORT), () => {
     console.log("server started on localhost:8000");
   });
 };

@@ -15,9 +15,8 @@ import {
 } from "type-graphql";
 import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
-import { getConnection, ReturningStatementNotSupportedError } from "typeorm";
+import { getConnection } from "typeorm";
 import { Upvote } from "../entities/Upvote";
-import { userInfo } from "os";
 import { User } from "../entities/User";
 
 @InputType()
@@ -118,13 +117,11 @@ export class PostResolver {
   async posts(
     @Arg("limit", () => Int) limit: number, //Cursor-Based pagination
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
-    @Ctx() { req }: MyContext
   ): Promise<PaginatedPosts> {
     limit = Math.min(50, limit) + 1;
 
     const replacements: any[] = [limit];
 
-    const { userId } = req.session;
 
     if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
