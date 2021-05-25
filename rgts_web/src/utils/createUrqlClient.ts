@@ -17,7 +17,7 @@ import {
 import { cacheExchange, Resolver, Cache } from "@urql/exchange-graphcache";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from "wonka";
-import { useRouter } from "next/router";
+import Router from "next/router";
 import gql from "graphql-tag";
 import { isServer } from "./isServer";
 
@@ -28,7 +28,7 @@ const errorExchange: Exchange =
       forward(ops$),
       tap(({ error }) => {
         if (error?.message.includes("Not Authenticated")) {
-          useRouter().replace("/login");
+          Router.replace("/login");
         }
       })
     );

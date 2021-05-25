@@ -4,6 +4,7 @@ import {
   PostsQuery,
   PostSnippetFragment,
   useVoteMutation,
+  useMeQuery,
 } from "../generated/graphql";
 
 interface UpvoteSectionProps {
@@ -14,6 +15,7 @@ export const UpvoteSection: React.FC<UpvoteSectionProps> = ({ post }) => {
     useState<"upvote-loading" | "downvote-loading" | "not-loading">(
       "not-loading"
     );
+  const [{data}] = useMeQuery()
   const [, vote] = useVoteMutation();
   return (
     <Flex direction="column" justifyContent="center" alignItems="center">
@@ -21,6 +23,7 @@ export const UpvoteSection: React.FC<UpvoteSectionProps> = ({ post }) => {
         variantColor= {post.voteStatus===1 ? "green" : undefined}
         icon="chevron-up"
         aria-label="Upvote Post"
+        isDisabled={!data?.me}
         onClick={async () => {
           setLoadingState("upvote-loading");
           await vote({
@@ -36,6 +39,7 @@ export const UpvoteSection: React.FC<UpvoteSectionProps> = ({ post }) => {
       variantColor= {post.voteStatus===-1 ? "red" : undefined}
         icon="chevron-down"
         aria-label="Downvote Post"
+        isDisabled={!data?.me}
         onClick={async () => {
           setLoadingState("downvote-loading");
           await vote({

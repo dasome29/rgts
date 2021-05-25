@@ -6,8 +6,7 @@ import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
-import path from 'path'
-
+import path from "path";
 
 import { UserResolver } from "./resolvers/user";
 import Redis from "ioredis";
@@ -19,6 +18,8 @@ import { createConnection } from "typeorm";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
 import { Upvote } from "./entities/Upvote";
+import { createUserLoader } from "./utils/createUserLoader";
+import { createUpvoteLoader } from "./utils/createUpvoteLoader";
 
 const main = async () => {
   // sendEmail('dasome29@hotmail.com', 'Hola, David wapo leyendo esto.');
@@ -29,14 +30,14 @@ const main = async () => {
     password: "davidsolis",
     logging: true,
     synchronize: true,
-    entities:[User, Post, Upvote],
-    migrations:[path.join(__dirname, "/migrations/*")]
+    entities: [User, Post, Upvote],
+    migrations: [path.join(__dirname, "/migrations/*")],
   });
 
-  connection.runMigrations()
+  connection.runMigrations();
 
   // await Post.delete({});
-//   connection.connect();
+  //   connection.connect();
   // await orm.em.nativeDelete(User, {});
 
   const app = express();
@@ -76,7 +77,13 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ req, res, redis }),
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+      upvoteLoader: createUpvoteLoader()
+    }),
   });
 
   apolloServer.applyMiddleware({ app, cors: false });

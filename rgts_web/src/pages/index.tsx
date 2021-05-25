@@ -23,6 +23,7 @@ import React, { useState } from "react";
 import { UpvoteSection } from "../components/UpvoteSection";
 import { isServer } from "../utils/isServer";
 import { useRouter } from "next/router";
+import { EditDeletePostButtons } from "../components/EditDeletePostButtons";
 const Index = () => {
   const [{ data: meData, fetching: meFetching }] = useMeQuery({
     pause: isServer(),
@@ -33,11 +34,16 @@ const Index = () => {
   });
   const [, deletePost] = useDeletePostMutation();
   const [, editPost] = useUpdatePostMutation();
-  const [{ data, fetching }] = usePostsQuery({
+  const [{ data, fetching , error}] = usePostsQuery({
     variables,
   });
   if (!fetching && !data) {
-    return <div>The query failed to pull Posts</div>;
+    return (
+      <div>
+        <div>The query failed to pull Posts</div>
+        <div>{error?.message}</div>
+      </div>
+    );
   }
   return (
     <Layout>
@@ -60,31 +66,8 @@ const Index = () => {
                       </Text>
                       <Text mt={4}>{p.textSnippet}</Text>
                     </Box>
-                    {fetching ? null : meData?.me ? (
-                      meData.me.id === p.creator.id ? (
-                        <Flex ml="auto" direction="column" align="center">
-                          <IconButton
-                            icon="delete"
-                            backgroundColor="transparent"
-                            aria-label="Delete Post"
-                            onClick={() => {
-                              deletePost({ id: p.id });
-                            }}
-                          ></IconButton>
-                          <NextLink
-                            href="/post/edit/[id]"
-                            as={`/post/edit/${p.id}`}
-                          >
-                            <IconButton
-                              icon="edit"
-                              backgroundColor="transparent"
-                              aria-label="Edit Post"
-                              as={Link}
-                            ></IconButton>
-                          </NextLink>
-                        </Flex>
-                      ) : null
-                    ) : null}
+
+                    <EditDeletePostButtons id={p.id} creatorId={p.creator.id} />
                   </Flex>
                 </Box>
               </Flex>
